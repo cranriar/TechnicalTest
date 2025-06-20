@@ -7,7 +7,7 @@
 <body>
     aaaaaa
     <div id="app">
-        <example-component></example-component>
+        <home></home>
     </div>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </body>
