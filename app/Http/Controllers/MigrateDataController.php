@@ -76,4 +76,35 @@ class MigrateDataController extends Controller
             'data' => []
         ], 200);
     }
+
+    public function updateData(Request $request){
+        DB::beginTransaction();
+        try {
+            $character = Character::where('id', $request['id'])->first();
+            if ($character) {
+                $character->update([
+                    'name' => $request['name'] ?? $character->name,
+                    'status' => $request['status'] ?? $character->status,
+                    'species' => $request['species'] ?? $character->species,
+                    'type' => $request['type'] ?? $character->type,
+                    'gender' => $request['gender'] ?? $character->gender,
+                    'image' => $request['image'] ?? $character->image,
+                    'created_at_api' => $request['created'] ?? $character->created_at_api,
+                ]);
+            }
+            DB::commit();
+            return response()->json([
+                'code' => 200,
+                'message' => 'Datos Actualizados',
+                'error' => null
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error al actualizar los datos',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
 }

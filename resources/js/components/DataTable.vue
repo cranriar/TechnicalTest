@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="data.length" class="align-items-center d-flex flex-column gap-3">
+        <div v-if="data.length && !editable" class="align-items-center d-flex flex-column gap-3">
             <button class="btn btn-primary btn-lg mb-3 d-flex align-items-center gap-2" @click="migrateData">
                 <svg width="25" height="50" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
                     <!-- Disquete 1 - Azul rey -->
@@ -26,11 +26,7 @@
                 Migrar información
             </button>
         </div>
-        <CharacterModal
-            :visible="modalVisible"
-            :character="characterSeleccionado"
-            @close="modalVisible = false"
-        />
+        
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
@@ -53,7 +49,7 @@
                             @click="$emit('edit', item)">Editar</button>
                         <button type="button"
                             class="btn btn-outline-primary d-inline-flex align-items-center gap-2 rounded-pill shadow-sm px-4 py-2"
-                            @click="mostrarDetalle(item)">
+                            @click="viewDetail(item)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                                 class="bi bi-eye-fill" viewBox="0 0 16 16">
                                 <path
@@ -82,6 +78,24 @@
         </div>
         <Loading v-if="loading"></Loading>
     </div>
+    <div>
+        <button class="btn btn-primary" @click="viewDetail">Abrir Modal</button>
+        <!-- <button class="btn btn-primary" @click="mostrar = true">Abrir Modal</button> -->
+
+        <Modal :show="mostrar" :title="titleModal" @close="mostrar = false">
+        <template #default>
+            <CharacterModal
+                :character="characterSeleccionado"
+                :isEditing="editable"
+            />
+        </template>
+
+        <template #footer>
+            <button class="btn btn-success" @click="confirmar">Aceptar</button>
+            <button class="btn btn-outline-secondary" @click="mostrar = false">Cancelar</button>
+        </template>
+        </Modal>
+    </div>
     
 </template>
 
@@ -89,8 +103,9 @@
 import { onActivated } from 'vue';
 import Loading from './Loading.vue';
 import CharacterModal from './CharacterModal.vue';
+import Modal from './Modal.vue';
 export default {
-    components: { Loading, CharacterModal },
+    components: { Loading, CharacterModal, Modal },
     name: 'DataTable',
     props: {
         url: {
@@ -112,7 +127,9 @@ export default {
             loading: false,
             error: null,
             modalVisible: false,
-            characterSeleccionado: null
+            characterSeleccionado: null,
+            mostrar: false,
+            titleModal: 'Detalle del Personaje'
         };
     },
     mounted() {
@@ -171,6 +188,10 @@ export default {
          mostrarDetalle(char) {
             this.characterSeleccionado = char;
             this.modalVisible = true;
+        },
+        viewDetail(item){
+            this.characterSeleccionado = item;
+            this.mostrar = true;
         }
     }
 };
