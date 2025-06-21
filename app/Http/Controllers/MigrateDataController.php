@@ -6,12 +6,14 @@ use App\Models\Character;
 use App\Models\Episode;
 use App\Models\Location;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 class MigrateDataController extends Controller
 {
     public function migrateData(Request $request)
     {
+        DB::beginTransaction();
         try {
             //code...
             foreach ($request->all() as $item) {
@@ -59,12 +61,14 @@ class MigrateDataController extends Controller
                     $character->episodes()->sync($episodeIds); // Vincula episodios
                 }
             }
+            DB::commit();
+            return response()->json(['message' => 'Migración completada'], 201);
         } catch (\Throwable $th) {
+            Db::rollBack();
             dd($th);
             //throw $th;
         }
 
-        return response()->json(['message' => 'Migración completada'], 201);
 
         return response()->json([
             'code' => 200,
